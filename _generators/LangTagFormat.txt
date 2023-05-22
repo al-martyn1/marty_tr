@@ -1,0 +1,9 @@
+Invalid=-1
+LangTag // 'en-US'
+LangTagNeutral // Force 'en'
+LangTagNeutralAuto // 'en' or 'en-US', depending on input
+LangId // 409 (no leading zeros)
+LangIdFull // 0409
+LangIdX // 0x409
+LangIdFullX // 0x0409
+
