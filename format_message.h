@@ -38,13 +38,17 @@ class FormatMessage
     typedef typename StringType::value_type    CharType;
     //typedef typename StringType::value_type    char_type;
 
+public:
+
+    typedef umba::macros::StringStringMap<StringType>  macros_map_type;
+
 protected:
 
-    macros::StringStringMap<StringType>        macros     ;
-    StringType                                 messageText;
-    bool                                       fShowbase   = true;
+    umba::macros::StringStringMap<StringType>  formattedMacros    ;
+    StringType                                 messageText        ;
+    bool                                       fShowbase   = true ;
     bool                                       fShowsign   = false;
-    unsigned                                   uBase       = 10;
+    unsigned                                   uBase       = 10   ;
 
     //TODO: !!! Надо подумать на тему замены десятичного разделителя и разделителя разрядов
 
@@ -201,16 +205,16 @@ public:
 
 
     FormatMessage( const StringType &msg, const std::string &ltag=std::string() )
-    : macros()
+    : formattedMacros()
     , messageText(msg)
     {}
 
 
     StringType toString() const
     {
-        return  macros::substMacros( messageText, macros::MacroTextFromMapRef<StringType>(macros)
-                                   , macros::smf_KeepUnknownVars | macros::smf_DisableRecursion
-                                   );
+        return umba::macros::substMacros( messageText, umba::macros::MacroTextFromMapRef<StringType>(formattedMacros)
+                                        , umba::macros::smf_KeepUnknownVars | umba::macros::smf_DisableRecursion
+                                        );
     }
 
     operator StringType() const
@@ -266,27 +270,41 @@ public:
     //! Установка нац особенностей форматирования десятичных чисел, делает decSep и decGroup
     virtual FormatMessage& locale(const std::string &ltag) { return *this; }
 
+    FormatMessage& values(const macros_map_type &predefMacros)
+    {
+        typename macros_map_type::const_iterator it = predefMacros.begin();
+        for(; it!=predefMacros.end(); ++it)
+        {
+            formattedMacros[it->first] = it->second;
+        }
 
+        return *this;
+    }
+
+    const macros_map_type& values() const
+    {
+        return formattedMacros;
+    }
 
     FormatMessage& arg(const StringType &argName, const StringType &val, std::size_t fieldWidth=0, EFormatAlign align=EFormatAlign::left)
     {
         StringType completemntString = getComplementString( val, fieldWidth, (CharType)' ' /* fillChar */ );
         if (align==EFormatAlign::left)
         {
-            macros[argName] = val + completemntString;
+            formattedMacros[argName] = val + completemntString;
         }
         else if (align==EFormatAlign::right)
         {
-            macros[argName] = completemntString + val;
+            formattedMacros[argName] = completemntString + val;
         }
         else // center
         {
             std::size_t lenLeft  = completemntString.size()/2;
             std::size_t lenRight = completemntString.size()-lenLeft;
-            macros[argName] = StringType(completemntString, 0, lenLeft)
-                            + val
-                            + StringType(completemntString, lenLeft)
-                            ;
+            formattedMacros[argName] = StringType(completemntString, 0, lenLeft)
+                                     + val
+                                     + StringType(completemntString, lenLeft)
+                                     ;
         }
 
         return *this;
@@ -313,8 +331,8 @@ public:
             std::size_t numberWidth = prefixWidth<fieldWidth ? fieldWidth-prefixWidth : 0;
 
             valFormatted = fShowbase 
-                         ? getUnsignedPrefix((UnsignedType)uBase) + formatUnsigned((UnsignedType)val, (UnsignedType)uBase, numberWidth)
-                         : formatUnsigned((UnsignedType)val, getCorrectBase((UnsignedType)uBase), numberWidth)
+                         ? getUnsignedPrefix((UnsignedType)uBase) + formatUnsigned<UnsignedType>(val, getCorrectBase(uBase), numberWidth)
+                         :                                          formatUnsigned<UnsignedType>(val, getCorrectBase(uBase), numberWidth)
                          ;
         }
 
