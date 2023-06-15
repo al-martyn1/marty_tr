@@ -859,6 +859,79 @@ void tr_add(const std::string &msgId, const std::string &msgText)
 
 
 //----------------------------------------------------------------------------
+template<typename THandler> inline
+void tr_enumerate_msgids(THandler handler, std::string catId, std::string langId)
+{
+    all_translations_map_t& trAllMap = tr_get_all_translations();
+
+    catId  = tr_fix_category(catId);
+    langId = tr_fix_lang_tag_format(langId);
+
+    all_translations_map_t::const_iterator lit = trAllMap.find(langId);
+    if (lit==trAllMap.end())
+        return; // No lang found
+
+
+    const category_translations_map_t &catMap = lit->second;
+
+    category_translations_map_t::const_iterator cit = catMap.find(catId);
+    if (cit==catMap.end())
+        return;
+
+
+    const translations_map_t &trMap = cit->second;
+    translations_map_t::const_iterator mit = trMap.begin();
+    for(; mit!=trMap.end(); ++mit)
+    {
+        handler(mit->first);
+    }
+}
+
+//----------------------------------------------------------------------------
+// Тут отличие от остального API - вместо установленного по дефолту языка используем 
+// всегда en-US для перечисления сообщений в категории, считая, что en-US - эталонная
+// трансляция и там всё есть
+template<typename THandler> inline
+void tr_enumerate_msgids(THandler handler, std::string catId)
+{
+    tr_enumerate_msgids(handler, catId, "en-US");
+}
+
+//----------------------------------------------------------------------------
+inline
+std::vector<std::string> tr_get_msgids(std::string catId, std::string langId)
+{
+    std::vector<std::string> res; res.reserve(32);
+
+    tr_enumerate_msgids( [&](const std::string &msgId)
+                         {
+                             res.emplace_back(msgId);
+                         }
+                       , catId, langId
+                       );
+    return res;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::vector<std::string> tr_get_msgids(std::string catId)
+{
+    std::vector<std::string> res; res.reserve(32);
+
+    tr_enumerate_msgids( [&](const std::string &msgId)
+                         {
+                             res.emplace_back(msgId);
+                         }
+                       , catId
+                       );
+    return res;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 inline
 bool tr_check_translation_completeness()
 {
