@@ -7,6 +7,8 @@
 
 int main( int argc, char* argv[] )
 {
+    MARTY_ARG_USED(argc);
+    MARTY_ARG_USED(argv);
 
     auto addLocaleInfoTranslation = [&]( const marty_tr::LocaleInfo &li)
     {

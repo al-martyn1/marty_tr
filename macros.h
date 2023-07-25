@@ -7,6 +7,19 @@
 #include <unordered_map>
 #include <unordered_set>
 
+
+//----------------------------------------------------------------------------
+#ifndef MARTY_ARG_USED
+
+    //! Подавление варнинга о неиспользованном аргументе
+    #define MARTY_ARG_USED(x)                   (void)(x)
+
+#endif
+
+//----------------------------------------------------------------------------
+
+
+
 /*
 
 : - in reference to macro perform a parameter substitution (like params in function call)

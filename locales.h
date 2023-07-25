@@ -12,6 +12,18 @@
 
 
 
+//----------------------------------------------------------------------------
+#ifndef MARTY_ARG_USED
+
+    //! РџРѕРґР°РІР»РµРЅРёРµ РІР°СЂРЅРёРЅРіР° Рѕ РЅРµРёСЃРїРѕР»СЊР·РѕРІР°РЅРЅРѕРј Р°СЂРіСѓРјРµРЅС‚Рµ
+    #define MARTY_ARG_USED(x)                   (void)(x)
+
+#endif
+
+//----------------------------------------------------------------------------
+
+
+
 namespace marty_tr {
 
 
@@ -26,6 +38,11 @@ Language Identifiers
         0x3F max                    0x3FF max
 */
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4623) // warning C4623: 'class': default constructor was implicitly defined as deleted
+#endif
+
 struct LocaleInfo
 {
     const char* const    lang    ;
@@ -33,6 +50,10 @@ struct LocaleInfo
     unsigned    const    langId  ; // Windows Language Identifier (Language ID, which is a part of the Windows Language Code Identifier - LCID)
     const char* const    ltag    ; // Language tag (locale name), en-US etc...
 };
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 
 // Locale names that are valid but not associated with a given LCID MAY be assigned the LCID Language ID 0x1000, if an LCID is requested by the application
@@ -976,7 +997,7 @@ std::string getLanguageTagTypeLocation(std::string t)
 }
 
 
-// Цифры - всегда в верхнем регистре, префикс 0x - в нижнем
+// Р¦РёС„СЂС‹ - РІСЃРµРіРґР° РІ РІРµСЂС…РЅРµРј СЂРµРіРёСЃС‚СЂРµ, РїСЂРµС„РёРєСЃ 0x - РІ РЅРёР¶РЅРµРј
 inline
 std::string formatLangId(unsigned langId, bool addPrefix = false, bool noLeadingZeros = false)
 {
@@ -985,9 +1006,9 @@ std::string formatLangId(unsigned langId, bool addPrefix = false, bool noLeading
     {
         unsigned d = langId & 0x0F;
         if (d<10)
-            res.append(1, '0'+d);
+            res.append(1, '0'+(char)d);
         else
-            res.append(1, 'A'+d);
+            res.append(1, 'A'+ (char)d);
     }
 
     if (noLeadingZeros)
@@ -1017,7 +1038,7 @@ bool isNumericLanguageTag(const std::string &langTag)
     if (langTag.size()<1)
         return false;
 
-    if (langTag.size()>2 && langTag[0]=='0' && (langTag[1]=='x' || langTag[1]=='X')) // Число с префиксом 0x
+    if (langTag.size()>2 && langTag[0]=='0' && (langTag[1]=='x' || langTag[1]=='X')) // Р§РёСЃР»Рѕ СЃ РїСЂРµС„РёРєСЃРѕРј 0x
         return true;
 
     if (langTag=="ceb")
@@ -1040,9 +1061,9 @@ bool isNumericLanguageTag(const std::string &langTag)
         return false;
     }
 
-    // Как будто бы число
+    // РљР°Рє Р±СѓРґС‚Рѕ Р±С‹ С‡РёСЃР»Рѕ
 
-    // aa, ae - это строковые тэги локалей, но похожи на числа. Но таких коротких чисел не должно быть
+    // aa, ae - СЌС‚Рѕ СЃС‚СЂРѕРєРѕРІС‹Рµ С‚СЌРіРё Р»РѕРєР°Р»РµР№, РЅРѕ РїРѕС…РѕР¶Рё РЅР° С‡РёСЃР»Р°. РќРѕ С‚Р°РєРёС… РєРѕСЂРѕС‚РєРёС… С‡РёСЃРµР» РЅРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ
 
     if (langTag.size()<=2)
         return false;
@@ -1064,11 +1085,11 @@ inline bool    isUpper( char ch )     { return (ch>='A' && ch<='Z'); }
 inline bool    isLower( wchar_t ch )  { return (ch>=L'a' && ch<=L'z'); }
 inline bool    isUpper( wchar_t ch )  { return (ch>=L'A' && ch<=L'Z'); }
 
-inline char    toLower( char ch )     { return isUpper(ch) ? ch-'A'+'a' : ch; }
-inline char    toUpper( char ch )     { return isLower(ch) ? ch-'a'+'A' : ch; }
+inline char    toLower( char ch )     { return (char)(isUpper(ch) ? ch-'A'+'a' : ch); }
+inline char    toUpper( char ch )     { return (char)(isLower(ch) ? ch-'a'+'A' : ch); }
 
-inline wchar_t toLower( wchar_t ch )  { return isUpper(ch) ? ch-L'A'+L'a' : ch; }
-inline wchar_t toUpper( wchar_t ch )  { return isLower(ch) ? ch-L'a'+L'A' : ch; }
+inline wchar_t toLower( wchar_t ch )  { return (wchar_t)(isUpper(ch) ? ch-L'A'+L'a' : ch); }
+inline wchar_t toUpper( wchar_t ch )  { return (wchar_t)(isLower(ch) ? ch-L'a'+L'A' : ch); }
 
 template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
 inline std::basic_string< CharT, Traits, Allocator >
@@ -1252,8 +1273,8 @@ std::unordered_map<std::string, std::string>& getLanguageTagSpecificByNeutralMap
 
 } // namespace impl_helpers
 
-//TODO: !!! Это не совсем безопасно, но если считать, что все настройки будут в однопотоке при запуске проги и потом не меняются, то норм
-// Вообще подразумевается, что они никогда не будут меняться, что и так всё хорошо настроено
+//TODO: !!! Р­С‚Рѕ РЅРµ СЃРѕРІСЃРµРј Р±РµР·РѕРїР°СЃРЅРѕ, РЅРѕ РµСЃР»Рё СЃС‡РёС‚Р°С‚СЊ, С‡С‚Рѕ РІСЃРµ РЅР°СЃС‚СЂРѕР№РєРё Р±СѓРґСѓС‚ РІ РѕРґРЅРѕРїРѕС‚РѕРєРµ РїСЂРё Р·Р°РїСѓСЃРєРµ РїСЂРѕРіРё Рё РїРѕС‚РѕРј РЅРµ РјРµРЅСЏСЋС‚СЃСЏ, С‚Рѕ РЅРѕСЂРј
+// Р’РѕРѕР±С‰Рµ РїРѕРґСЂР°Р·СѓРјРµРІР°РµС‚СЃСЏ, С‡С‚Рѕ РѕРЅРё РЅРёРєРѕРіРґР° РЅРµ Р±СѓРґСѓС‚ РјРµРЅСЏС‚СЊСЃСЏ, С‡С‚Рѕ Рё С‚Р°Рє РІСЃС‘ С…РѕСЂРѕС€Рѕ РЅР°СЃС‚СЂРѕРµРЅРѕ
 
 inline
 void setLanguageTagSpecificByNeutral(const std::string &tneutral, const std::string &t)
@@ -1288,16 +1309,16 @@ void makeLangMaps( std::unordered_map<unsigned   , std::size_t>  *idToIndexMap
     {
         if (idToIndexMap && pLocales[i].langId!=0x1000)
         {
-            (*idToIndexMap)[pLocales[i].langId] = i; // мапим виндовый LangID на индекс в массиве локалей
+            (*idToIndexMap)[pLocales[i].langId] = i; // РјР°РїРёРј РІРёРЅРґРѕРІС‹Р№ LangID РЅР° РёРЅРґРµРєСЃ РІ РјР°СЃСЃРёРІРµ Р»РѕРєР°Р»РµР№
         }
 
         if (tagToIndexMap)
         {
-            (*tagToIndexMap)[pLocales[i].ltag] = i; // мапим lang tag на индекс в массиве локалей
+            (*tagToIndexMap)[pLocales[i].ltag] = i; // РјР°РїРёРј lang tag РЅР° РёРЅРґРµРєСЃ РІ РјР°СЃСЃРёРІРµ Р»РѕРєР°Р»РµР№
 
             if (pLocales[i].langId!=0x1000)
             {
-                // Также хотим, чтобы мапились виндовые локали вида 0xNNNN/0XNNNN/0xNNN/0XNNN/NNNN/NNN в строковом представлении
+                // РўР°РєР¶Рµ С…РѕС‚РёРј, С‡С‚РѕР±С‹ РјР°РїРёР»РёСЃСЊ РІРёРЅРґРѕРІС‹Рµ Р»РѕРєР°Р»Рё РІРёРґР° 0xNNNN/0XNNNN/0xNNN/0XNNN/NNNN/NNN РІ СЃС‚СЂРѕРєРѕРІРѕРј РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРё
                                                                       // addPrefix  noLeadingZeros
                 if (pLocales[i].langId>=0x100)
                 {
@@ -1392,7 +1413,7 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
     const std::unordered_map<std::string, std::size_t> &tagMap = impl_helpers::getTagToIndexMap();
     std::unordered_map<std::string, std::size_t>::const_iterator it = tagMap.end();
 
-    // Для числовых langTag'ов просто - если найден, то там то, что нужно
+    // Р”Р»СЏ С‡РёСЃР»РѕРІС‹С… langTag'РѕРІ РїСЂРѕСЃС‚Рѕ - РµСЃР»Рё РЅР°Р№РґРµРЅ, С‚Рѕ С‚Р°Рј С‚Рѕ, С‡С‚Рѕ РЅСѓР¶РЅРѕ
     if (isNumericLanguageTag(langTag))
     {
         it = tagMap.find(impl_helpers::toUpper(langTag));
@@ -1404,8 +1425,8 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
     // language tag: nlang-LOCATION, en-US etc
     // nlang       : language neutral, en etc
     
-    /* Если находим по language tag, что ему нет ассоциированных Language ID, то вырезаем nlang часть, и ищем по ней.
-       Если находим по nlang, что ему нет ассоциированных Language ID, то ищем подходящий не нейтральный
+    /* Р•СЃР»Рё РЅР°С…РѕРґРёРј РїРѕ language tag, С‡С‚Рѕ РµРјСѓ РЅРµС‚ Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРЅС‹С… Language ID, С‚Рѕ РІС‹СЂРµР·Р°РµРј nlang С‡Р°СЃС‚СЊ, Рё РёС‰РµРј РїРѕ РЅРµР№.
+       Р•СЃР»Рё РЅР°С…РѕРґРёРј РїРѕ nlang, С‡С‚Рѕ РµРјСѓ РЅРµС‚ Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРЅС‹С… Language ID, С‚Рѕ РёС‰РµРј РїРѕРґС…РѕРґСЏС‰РёР№ РЅРµ РЅРµР№С‚СЂР°Р»СЊРЅС‹Р№
     
      */
 
@@ -1415,16 +1436,16 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
 
     while (it!=tagMap.end())
     {
-        // Что-то нашлось
+        // Р§С‚Рѕ-С‚Рѕ РЅР°С€Р»РѕСЃСЊ
         pli = impl_helpers::getLocaleInfoByIndex(it->second);
         if (!pli)
             throw std::runtime_error("marty_tr::getLocaleInfo(std::string) - something goes wrong (1)");
 
         if (pli->langId==0x1000)
-            break; // Not assigned, продолжаем поиск
+            break; // Not assigned, РїСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРёСЃРє
 
         if (pli->langId<0x100 && !neutralAllowed)
-            break; // Neutral, not allowed, продолжаем поиск
+            break; // Neutral, not allowed, РїСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРёСЃРє
         
         return pli;
     }
@@ -1440,16 +1461,16 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
 
     while (it!=tagMap.end())
     {
-        // Что-то нашлось
+        // Р§С‚Рѕ-С‚Рѕ РЅР°С€Р»РѕСЃСЊ
         pli = impl_helpers::getLocaleInfoByIndex(it->second);
         if (!pli)
             throw std::runtime_error("marty_tr::getLocaleInfo(std::string) - something goes wrong (2)");
 
         if (pli->langId==0x1000)
-            break; // Not assigned, продолжаем поиск
+            break; // Not assigned, РїСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРёСЃРє
 
         if (pli->langId<0x100 && !neutralAllowed)
-            break; // Neutral, not allowed, продолжаем поиск
+            break; // Neutral, not allowed, РїСЂРѕРґРѕР»Р¶Р°РµРј РїРѕРёСЃРє
         
         return pli;
     }
@@ -1500,24 +1521,33 @@ std::string formatLangTag(const std::string &langTagOrId, ELangTagFormat fmt)
              {
                  const LocaleInfo* pLocInfo = getLocaleInfo( langTagOrId, false /* neutralAllowed */);
                  if (!pLocInfo)
-                     break; // что-то пошло не так
+                     break; // С‡С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє
 
                                                       //      bool addPrefix, bool noLeadingZeros
                  switch(fmt)
                  {
-                    case ELangTagFormat::langId:      // 409 (no leading zeros)
-                         return formatLangId(pLocInfo->langId, false, true );
+                      case ELangTagFormat::langId:      // 409 (no leading zeros)
+                           return formatLangId(pLocInfo->langId, false, true );
              
-                    case ELangTagFormat::langIdFull:  // 0409
-                         return formatLangId(pLocInfo->langId, false, false);
+                      case ELangTagFormat::langIdFull:  // 0409
+                           return formatLangId(pLocInfo->langId, false, false);
              
-                    case ELangTagFormat::langIdX:     // 0x409
-                         return formatLangId(pLocInfo->langId, true , true );
+                      case ELangTagFormat::langIdX:     // 0x409
+                           return formatLangId(pLocInfo->langId, true , true );
              
-                    case ELangTagFormat::langIdFullX: // 0x0409
-                         return formatLangId(pLocInfo->langId, true , false);
+                      case ELangTagFormat::langIdFullX: // 0x0409
+                           return formatLangId(pLocInfo->langId, true , false);
+
+                      case ELangTagFormat::invalid           : [[fallthrough]];
+                      case ELangTagFormat::langTag           : [[fallthrough]];
+                      case ELangTagFormat::langTagNeutral    : [[fallthrough]];
+                      case ELangTagFormat::langTagNeutralAuto: [[fallthrough]];
+
+                      default: {}
                  }
              }
+
+        case ELangTagFormat::invalid: [[fallthrough]];
 
         default: return std::string();
     }
@@ -1566,6 +1596,8 @@ std::string formatLangTag(unsigned langId, ELangTagFormat fmt)
         case ELangTagFormat::langIdFullX: // 0x0409
              return formatLangId(pLocInfo->langId, true , false);
 
+        case ELangTagFormat::invalid: [[fallthrough]];
+
         default: return std::string();
 
     }
@@ -1598,7 +1630,7 @@ enum class ELangTagFormat
 
 
 // ISO 3166-1:2020
-// Codes for the representation of names of countries and their subdivisions — Part 1: Country code
+// Codes for the representation of names of countries and their subdivisions вЂ” Part 1: Country code
 // https://www.iso.org/standard/72482.html
 // https://en.wikipedia.org/wiki/ISO_3166-1
 

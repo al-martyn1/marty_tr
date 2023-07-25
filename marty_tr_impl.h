@@ -6,12 +6,26 @@
 #include "marty_yaml_toml_json/json_utils.h"
 #include "marty_yaml_toml_json/yaml_json.h"
 
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include <exception>
 #include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
+
+
+
+//----------------------------------------------------------------------------
+#ifndef MARTY_ARG_USED
+
+    //! Подавление варнинга о неиспользованном аргументе
+    #define MARTY_ARG_USED(x)                   (void)(x)
+
+#endif
+
+//----------------------------------------------------------------------------
+
+
 
 
 //----------------------------------------------------------------------------
@@ -107,8 +121,10 @@ inline
 std::string to_ascii(const std::wstring &str)
 {
     std::string strRes; strRes.reserve(str.size());
-    for(auto ch : str)
-        strRes.append(1, (wchar_t)ch);
+    for (auto ch : str)
+    {
+        strRes.append(1, (char)(unsigned char)ch);
+    }
     return strRes;
 }
 
@@ -136,7 +152,7 @@ std::wstring to_wide(const std::string &str)
 {
     std::wstring strRes; strRes.reserve(str.size());
     for(auto ch : str)
-        strRes.append(1, (char)ch);
+        strRes.append(1, (wchar_t)(unsigned char)ch);
     return strRes;
 }
 
@@ -164,6 +180,7 @@ ResultStringType to_string_type(StringType s)
 //----------------------------------------------------------------------------
 struct IErrReportHandler
 {
+    virtual ~IErrReportHandler() {}
     virtual void messageNotFound(MsgNotFound what, const std::string& msg, const std::string& catId, const std::string& langId) = 0;
 
     //! return true if overwriting prev value allowed
@@ -186,7 +203,12 @@ typedef IErrReportHandler* IErrReportHandlerPtr;
 struct DefaultMessageNotFoundHandler
 {
     void operator()(MsgNotFound what, const std::string& msg, const std::string& catId, const std::string& langId) const
-    {}
+    {
+        MARTY_ARG_USED(what);
+        MARTY_ARG_USED(msg);
+        MARTY_ARG_USED(catId);
+        MARTY_ARG_USED(langId);
+    }
 };
 
 //------------------------------
@@ -194,6 +216,11 @@ struct DefaultTranslationAlreadyExistHandler
 {
     bool operator()(const std::string& msgId, const std::string& msgPrev, const std::string& msgNew, const std::string& catId, const std::string& langId) const
     {
+        MARTY_ARG_USED(msgId);
+        MARTY_ARG_USED(msgPrev);
+        MARTY_ARG_USED(msgNew);
+        MARTY_ARG_USED(catId);
+        MARTY_ARG_USED(langId);
         return true; // allow overwite
     }
 };
@@ -203,6 +230,8 @@ struct DefaultMessageNotFullyTranslatedHandler
 {
     void operator()(const std::string& catId, const std::string& msgId) const
     {
+        MARTY_ARG_USED(catId);
+        MARTY_ARG_USED(msgId);
     }
 };
 
@@ -211,6 +240,8 @@ struct DefaultMessageMissingTranslationHandler
 {
     void operator()(const std::string& lang, const std::string& langTag) const
     {
+        MARTY_ARG_USED(lang);
+        MARTY_ARG_USED(langTag);
     }
 };
 
@@ -493,7 +524,7 @@ std::string tr_serialize_translations(const all_translations_map_t &trMap, unsig
         jLang[langId] = jCat;
     }
 
-    std::string strFromJ = jLang.dump(indent);
+    std::string strFromJ = jLang.dump((int)indent);
 
     return strFromJ;
 }
@@ -587,7 +618,7 @@ bool tr_has_category(const all_translations_map_t &trMap, std::string catId)
 
     for(const auto &langKvp : trMap)
     {
-        const std::string &langId                      = langKvp.first;
+        // const std::string &langId                      = langKvp.first; // not used
         const category_translations_map_t &catMap      = langKvp.second;
         category_translations_map_t::const_iterator it = catMap.find(catId);
         if (it!=catMap.end())
@@ -613,7 +644,7 @@ bool tr_replace_category(all_translations_map_t &trMap, std::string prevCatId, s
 
     for(auto &langKvp : trMap)
     {
-        const std::string &langId                       = langKvp.first;
+        // const std::string &langId                       = langKvp.first; // not used
         category_translations_map_t &catMap             = langKvp.second;
         category_translations_map_t::const_iterator nit = catMap.find(prevCatId);
         if (nit!=catMap.end())
@@ -976,7 +1007,7 @@ bool tr_check_translation_completeness()
             for(const auto &msgKvp : msgMap)
             {
                 const auto &msgId   = msgKvp.first;
-                const auto &msgText = msgKvp.second;
+                // const auto &msgText = msgKvp.second; // not used
 
                 // Склеиваем категорию:сообщение в ключ, и инкрементируем элемент map по этому ключу.
 
@@ -993,9 +1024,9 @@ bool tr_check_translation_completeness()
     for(const auto &msgCatKvp : msgLangs)
     {
         const auto &msgCat   = msgCatKvp.first;
-        const auto &msgLangs = msgCatKvp.second;
+        const auto &msgLangs2 = msgCatKvp.second;
 
-        if (msgLangs.size()!=foundLangs.size())
+        if (msgLangs2.size()!=foundLangs.size())
         {
             ++errCnt;
 
@@ -1009,8 +1040,8 @@ bool tr_check_translation_completeness()
             // iterate through all found langs
             for(const auto &lang : foundLangs)
             {
-                std::set<std::string>::const_iterator it = msgLangs.find(lang);
-                if (it==msgLangs.end()) // если язык не найден для данного сообщения, то выводим сообщение
+                std::set<std::string>::const_iterator it = msgLangs2.find(lang);
+                if (it==msgLangs2.end()) // если язык не найден для данного сообщения, то выводим сообщение
                 {
                     auto langTag = marty_tr::formatLangTag(lang, marty_tr::ELangTagFormat::langTag);
                     handleMissingTranslation(lang,langTag);
@@ -1018,9 +1049,9 @@ bool tr_check_translation_completeness()
 
             } // for(const auto &lang : foundLangs)
         
-        } // if (msgLangs.size()!=foundLangs.size())
+        } // if (msgLangs2.size()!=foundLangs.size())
 
-    } // for(const auto &msgCatKvp : msgLangs)
+    } // for(const auto &msgCatKvp : msgLangs2)
 
     return errCnt==0;
 }
