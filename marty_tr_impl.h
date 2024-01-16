@@ -692,6 +692,13 @@ bool& tr_get_msg_not_found_decorate_mode()
     return mode;
 }
 
+inline
+bool& tr_get_empty_msg_not_exist()
+{
+    static bool mode = false;
+    return mode;
+}
+
 
 
 } // namespace impl_helpers
@@ -756,6 +763,26 @@ bool tr_set_msg_not_found_decorate_mode(bool newMode)
 {
     bool res = impl_helpers::tr_get_msg_not_found_decorate_mode();
     impl_helpers::tr_get_msg_not_found_decorate_mode() = newMode;
+    return res;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+bool tr_get_empty_msg_not_exist()
+{
+    return impl_helpers::tr_get_empty_msg_not_exist();
+}
+
+//----------------------------------------------------------------------------
+inline
+bool tr_set_empty_msg_not_exist(bool mode)
+{
+    bool res = impl_helpers::tr_get_empty_msg_not_exist();
+    impl_helpers::tr_get_empty_msg_not_exist() = mode;
     return res;
 }
 
@@ -833,7 +860,10 @@ std::string tr(const std::string &msgId, std::string catId, std::string langId)
     const translations_map_t &trMap = cit->second;
 
     translations_map_t::const_iterator mit = trMap.find(msgId);
-    if (mit==trMap.end() || mit->second.empty())
+    if (mit==trMap.end())
+        return reportTrNotFound(MsgNotFound::msg);
+
+    if (tr_get_empty_msg_not_exist() && mit->second.empty())
         return reportTrNotFound(MsgNotFound::msg);
 
     return mit->second;
@@ -866,7 +896,12 @@ bool tr_has_msg(const std::string &msgId, std::string catId, std::string langId)
 
     translations_map_t::const_iterator mit = trMap.find(msgId);
     //if (mit==trMap.end())
-    if (mit==trMap.end() || mit->second.empty())
+    if (mit==trMap.end())
+    {
+        return false;
+    }
+
+    if (tr_get_empty_msg_not_exist() && mit->second.empty())
     {
         return false;
     }
