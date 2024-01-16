@@ -412,7 +412,7 @@ std::string tr_fix_category(const std::string &catId)
 
     for(auto ch : catId)
     {
-        if (ch=='\\' || ch==':')
+        if (ch=='\\' || ch==':' || ch=='.')
             ch = '/';
 
         if (ch=='/' && !newCatId.empty() && newCatId.back()=='/')
@@ -833,11 +833,79 @@ std::string tr(const std::string &msgId, std::string catId, std::string langId)
     const translations_map_t &trMap = cit->second;
 
     translations_map_t::const_iterator mit = trMap.find(msgId);
-    if (mit==trMap.end())
+    if (mit==trMap.end() || mit->second.empty())
         return reportTrNotFound(MsgNotFound::msg);
 
     return mit->second;
 }
+
+//----------------------------------------------------------------------------
+inline
+bool tr_has_msg(const std::string &msgId, std::string catId, std::string langId)
+{
+    const all_translations_map_t& trAllMap = tr_get_all_translations();
+
+    catId  = tr_fix_category(catId);
+    langId = tr_fix_lang_tag_format(langId);
+
+    all_translations_map_t::const_iterator lit = trAllMap.find(langId);
+    if (lit==trAllMap.end())
+    {
+        return false;
+    }
+
+    const category_translations_map_t &catMap = lit->second;
+
+    category_translations_map_t::const_iterator cit = catMap.find(catId);
+    if (cit==catMap.end())
+    {
+        return false;
+    }
+
+    const translations_map_t &trMap = cit->second;
+
+    translations_map_t::const_iterator mit = trMap.find(msgId);
+    //if (mit==trMap.end())
+    if (mit==trMap.end() || mit->second.empty())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//----------------------------------------------------------------------------
+inline
+bool tr_has_msg(const std::string &msgId, std::string catId)
+{
+    return tr_has_msg(msgId, catId, tr_get_def_lang());
+}
+
+//----------------------------------------------------------------------------
+inline
+bool tr_has_msg(const std::string &msgId)
+{
+    return tr_has_msg(msgId, tr_get_def_category(), tr_get_def_lang());
+}
+
+//----------------------------------------------------------------------------
+// inline
+// bool tr_has_message(const all_translations_map_t &trMap, std::string msgId, std::string catId)
+// {
+//     catId = tr_fix_category(catId);
+//  
+//     for(const auto &langKvp : trMap)
+//     {
+//         // const std::string &langId                      = langKvp.first; // not used
+//         const category_translations_map_t &catMap      = langKvp.second;
+//         category_translations_map_t::const_iterator it = catMap.find(catId);
+//         if (it!=catMap.end())
+//             return true; // category found
+//     }
+//  
+//     return false;
+// }
+
 
 //----------------------------------------------------------------------------
 inline
