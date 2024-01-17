@@ -18,5 +18,7 @@ enum class ELangTagFormat
 
 }; // enum class ELangTagFormat
 
+MARTY_CPP_MAKE_ENUM_IS_FLAGS_FOR_NON_FLAGS_ENUM(ELangTagFormat)
+
 } // namespace marty_tr
 
