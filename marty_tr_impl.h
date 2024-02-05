@@ -974,18 +974,53 @@ void tr_add(const std::string &msgId, const std::string &msgText, std::string ca
     trAllMap[langId][catId][msgId] = msgText;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------
 inline
 void tr_add(const std::string &msgId, const std::string &msgText, const std::string &catId)
 {
     tr_add(msgId, msgText, catId, tr_get_def_lang());
 }
 
-//----------------------------------------------------------------------------
+//------------------------------
 inline
 void tr_add(const std::string &msgId, const std::string &msgText)
 {
     tr_add(msgId, msgText, tr_get_def_category(), tr_get_def_lang());
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+void tr_add_if_empty(const std::string &msgId, const std::string &msgText, std::string catId, std::string langId)
+{
+    if (tr_has_msg(msgId, catId, langId))
+    {
+        return;
+    }
+
+    all_translations_map_t& trAllMap = tr_get_all_translations();
+
+    catId  = tr_fix_category(catId);
+    langId = tr_fix_lang_tag_format(langId);
+
+    trAllMap[langId][catId][msgId] = msgText;
+}
+
+//------------------------------
+inline
+void tr_add_if_empty(const std::string &msgId, const std::string &msgText, const std::string &catId)
+{
+    tr_add_if_empty(msgId, msgText, catId, tr_get_def_lang());
+}
+
+//------------------------------
+inline
+void tr_add_if_empty(const std::string &msgId, const std::string &msgText)
+{
+    tr_add_if_empty(msgId, msgText, tr_get_def_category(), tr_get_def_lang());
 }
 
 //----------------------------------------------------------------------------
