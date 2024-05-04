@@ -56,6 +56,39 @@ struct LocaleInfo
 #endif
 
 
+struct StringLocaleInfo
+{
+    std::string          lang    ;
+    std::string          location; // or type
+    unsigned             langId  ; // Windows Language Identifier (Language ID, which is a part of the Windows Language Code Identifier - LCID)
+    std::string          ltag    ; // Language tag (locale name), en-US etc...
+
+    StringLocaleInfo(const LocaleInfo &li)
+    {
+        if (li.lang)
+            lang = li.lang;
+
+        if (li.location)
+            location = li.location;
+
+        if (li.ltag)
+            ltag = li.ltag;
+
+        langId = li.langId;
+    }
+    
+    StringLocaleInfo() = default;
+    StringLocaleInfo(const StringLocaleInfo&) = default;
+    StringLocaleInfo& operator=(const StringLocaleInfo&) = default;
+    StringLocaleInfo(StringLocaleInfo&&) = default;
+    StringLocaleInfo& operator=(StringLocaleInfo&&) = default;
+
+
+
+};
+
+
+
 // Locale names that are valid but not associated with a given LCID MAY be assigned the LCID Language ID 0x1000, if an LCID is requested by the application
 
 
@@ -958,6 +991,24 @@ void forEachLocaleInfo(Handler handler)
 
         handler(localeInfoCopy);
     }
+}
+
+inline
+std::map<std::string, StringLocaleInfo> getStringLocaleInfoMap()
+{
+    std::map<std::string, StringLocaleInfo> m;
+
+    forEachLocaleInfo( [&](const LocaleInfo li)
+                       {
+                           auto sli = StringLocaleInfo(li);
+                           if (!sli.ltag.empty())
+                           {
+                               m[sli.ltag] = sli;
+                           }
+                       }
+                     );
+
+    return m;
 }
 
 
