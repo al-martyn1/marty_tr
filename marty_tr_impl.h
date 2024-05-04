@@ -370,6 +370,25 @@ IErrReportHandlerPtr tr_set_err_handler(IErrReportHandlerPtr newPh)
     return ph;
 }
 
+
+struct AutoRestoreErrReportHandler
+{
+protected:
+    IErrReportHandlerPtr pHandler = 0;
+
+public:
+
+    AutoRestoreErrReportHandler(IErrReportHandlerPtr pH) : pHandler(pH) {}
+    ~AutoRestoreErrReportHandler() { tr_set_err_handler(pHandler); }
+
+    AutoRestoreErrReportHandler() = delete;
+    AutoRestoreErrReportHandler(const AutoRestoreErrReportHandler &) = delete;
+    AutoRestoreErrReportHandler& operator=(const AutoRestoreErrReportHandler &) = delete;
+    AutoRestoreErrReportHandler(AutoRestoreErrReportHandler &&) = delete;
+    AutoRestoreErrReportHandler& operator=(AutoRestoreErrReportHandler &&) = delete;
+
+}; // struct AutoRestoreErrReportHandler
+
 //----------------------------------------------------------------------------
 
 
