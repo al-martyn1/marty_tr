@@ -39,9 +39,30 @@ namespace marty_tr {
 
 
 //----------------------------------------------------------------------------
+#if defined(MARTY_TR_FORCE_USE_UNORDERED_MAP)
+
+    #define MARTY_TR_USE_UNORDERED_MAP
+
+#endif
+
+
+#if !defined(MARTY_TR_USE_UNORDERED_MAP)
+
+    #if defined(DEBUG) || defined(_DEBUG)
+
+    #else
+
+        #define MARTY_TR_USE_UNORDERED_MAP
+
+    #endif
+
+#endif
+
+
+
 
 // https://en.cppreference.com/w/cpp/language/type_alias
-#if defined(DEBUG) || defined(_DEBUG)
+#if !defined(MARTY_TR_USE_UNORDERED_MAP)
 
     // При отладке удобнее разглядывать std::map
 
