@@ -718,8 +718,6 @@ bool& tr_get_empty_msg_not_exist()
     return mode;
 }
 
-
-
 } // namespace impl_helpers
 
 //----------------------------------------------------------------------------
@@ -804,6 +802,25 @@ bool tr_set_empty_msg_not_exist(bool mode)
     impl_helpers::tr_get_empty_msg_not_exist() = mode;
     return res;
 }
+
+struct AutoEmptyMsgNotExist
+{
+protected:
+    bool prevMode = false;
+
+public:
+
+    AutoEmptyMsgNotExist(bool trNe) : prevMode(trNe) {}
+    ~AutoEmptyMsgNotExist() { tr_set_empty_msg_not_exist(prevMode); }
+
+    AutoEmptyMsgNotExist() = delete;
+    AutoEmptyMsgNotExist(const AutoEmptyMsgNotExist &) = delete;
+    AutoEmptyMsgNotExist& operator=(const AutoEmptyMsgNotExist &) = delete;
+    AutoEmptyMsgNotExist(AutoEmptyMsgNotExist &&) = delete;
+    AutoEmptyMsgNotExist& operator=(AutoEmptyMsgNotExist &&) = delete;
+
+}; // struct AutoEmptyMsgNotExist
+
 
 //----------------------------------------------------------------------------
 
