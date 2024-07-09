@@ -56,7 +56,7 @@ namespace macros{
 
 
 // https://en.cppreference.com/w/cpp/language/type_alias
-#if defined(DEBUG) || defined(_DEBUG)
+#if !defined(NDEBUG)
 
     // При отладке удобнее разглядывать std::map
 

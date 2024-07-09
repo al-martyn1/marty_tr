@@ -48,7 +48,7 @@ namespace marty_tr {
 
 #if !defined(MARTY_TR_USE_UNORDERED_MAP)
 
-    #if defined(DEBUG) || defined(_DEBUG)
+    #if !defined(NDEBUG)
 
     #else
 
