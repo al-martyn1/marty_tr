@@ -308,7 +308,7 @@ struct ErrReportHandler : public IErrReportHandler
     {
         messageNotFullyTranslatedHandler(catId, msgId);
     }
-     
+
     virtual void messageMissingTranslation(const std::string& lang, const std::string& lanfTag) override
     {
         messageMissingTranslationHandler(lang, lanfTag);
@@ -331,7 +331,7 @@ ErrReportHandler< MessageNotFoundHandler
                 , TranslationAlreadyExistHandler
                 , MessageNotFullyTranslatedHandler
                 , MessageMissingTranslationHandler
-                > 
+                >
 makeErrReportHandler( MessageNotFoundHandler           mnfHandler   = DefaultMessageNotFoundHandler()
                     , TranslationAlreadyExistHandler   taeHandler   = DefaultTranslationAlreadyExistHandler()
                     , MessageNotFullyTranslatedHandler mnftHandler  = DefaultMessageNotFullyTranslatedHandler()
@@ -487,7 +487,7 @@ all_translations_map_t tr_parse_translations_data(const std::string &trJson)
             oss << "JSON:" << "\n";
             oss << tmpJson << "\n";
         }
-        
+
         throw std::runtime_error(oss.str());
     }
 
@@ -579,7 +579,7 @@ all_translations_map_t& tr_get_all_translations()
 }
 
 //----------------------------------------------------------------------------
-inline 
+inline
 void tr_init_all_translations(const std::string &trJson)
 {
     tr_get_all_translations() = tr_parse_translations_data(trJson);
@@ -985,7 +985,7 @@ bool tr_has_msg(const std::string &msgId)
 // bool tr_has_message(const all_translations_map_t &trMap, std::string msgId, std::string catId)
 // {
 //     catId = tr_fix_category(catId);
-//  
+//
 //     for(const auto &langKvp : trMap)
 //     {
 //         // const std::string &langId                      = langKvp.first; // not used
@@ -994,7 +994,7 @@ bool tr_has_msg(const std::string &msgId)
 //         if (it!=catMap.end())
 //             return true; // category found
 //     }
-//  
+//
 //     return false;
 // }
 
@@ -1114,7 +1114,7 @@ void tr_enumerate_msgids(THandler handler, std::string catId, std::string langId
 }
 
 //----------------------------------------------------------------------------
-// Тут отличие от остального API - вместо установленного по дефолту языка используем 
+// Тут отличие от остального API - вместо установленного по дефолту языка используем
 // всегда en-US для перечисления сообщений в категории, считая, что en-US - эталонная
 // трансляция и там всё есть
 template<typename THandler> inline
@@ -1243,7 +1243,7 @@ bool tr_check_translation_completeness()
                 }
 
             } // for(const auto &lang : foundLangs)
-        
+
         } // if (msgLangs2.size()!=foundLangs.size())
 
     } // for(const auto &msgCatKvp : msgLangs2)

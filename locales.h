@@ -76,7 +76,7 @@ struct StringLocaleInfo
 
         langId = li.langId;
     }
-    
+
     StringLocaleInfo() = default;
     StringLocaleInfo(const StringLocaleInfo&) = default;
     StringLocaleInfo& operator=(const StringLocaleInfo&) = default;
@@ -98,7 +98,7 @@ struct StringLocaleInfo
 
 const LocaleInfo* getLocalesInfo( std::size_t *pSize )
 {
-    static LocaleInfo localeInfo[] = 
+    static LocaleInfo localeInfo[] =
     {
         /*
             Release key      Supported versions
@@ -1027,7 +1027,7 @@ std::string correctLanguageTag(std::string t)
     return t;
 }
 
-inline 
+inline
 std::string getLanguageTagNeutral(std::string t)
 {
     t = correctLanguageTag(t);
@@ -1037,7 +1037,7 @@ std::string getLanguageTagNeutral(std::string t)
     return std::string(t, 0, sepPos);
 }
 
-inline 
+inline
 std::string getLanguageTagTypeLocation(std::string t)
 {
     t = correctLanguageTag(t);
@@ -1108,7 +1108,7 @@ bool isNumericLanguageTag(const std::string &langTag)
 
         if (ch>='a' && ch<='f')
             continue;
-        
+
         return false;
     }
 
@@ -1174,7 +1174,7 @@ toUpper( const std::basic_string< CharT, Traits, Allocator > &str )
 inline
 std::unordered_map<std::string, std::string>& getLanguageTagSpecificByNeutralMap()
 {
-    static std::unordered_map<std::string, std::string> m = 
+    static std::unordered_map<std::string, std::string> m =
     {
         //{"", ""}, //
         { "af", "af-ZA" }, // Afrikaans (South Africa)
@@ -1432,7 +1432,7 @@ const LocaleInfo* getLocaleInfoByIndex( std::size_t idx )
 
     return &pInfos[idx];
 }
-    
+
 
 } // namespace impl_helpers
 
@@ -1475,10 +1475,10 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
 
     // language tag: nlang-LOCATION, en-US etc
     // nlang       : language neutral, en etc
-    
+
     /* Если находим по language tag, что ему нет ассоциированных Language ID, то вырезаем nlang часть, и ищем по ней.
        Если находим по nlang, что ему нет ассоциированных Language ID, то ищем подходящий не нейтральный
-    
+
      */
 
     const LocaleInfo* pli = 0;
@@ -1497,7 +1497,7 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
 
         if (pli->langId<0x100 && !neutralAllowed)
             break; // Neutral, not allowed, продолжаем поиск
-        
+
         return pli;
     }
 
@@ -1522,7 +1522,7 @@ const LocaleInfo* getLocaleInfo( std::string langTag, bool neutralAllowed = fals
 
         if (pli->langId<0x100 && !neutralAllowed)
             break; // Neutral, not allowed, продолжаем поиск
-        
+
         return pli;
     }
 
@@ -1555,16 +1555,16 @@ std::string formatLangTag(const std::string &langTagOrId, ELangTagFormat fmt)
     {
         case ELangTagFormat::langTag: // full
              return getLocaleLanguageTag( langTagOrId, false /* neutralAllowed */);
-             
+
         case ELangTagFormat::langTagNeutral: // Force neutral
              {
                  std::string tagTmp = getLocaleLanguageTag( langTagOrId, true /* neutralAllowed */);
                  return getLanguageTagNeutral(tagTmp);
              }
-             
+
         case ELangTagFormat::langTagNeutralAuto:
              return getLocaleLanguageTag( langTagOrId, true /* neutralAllowed */);
-             
+
         case ELangTagFormat::langId:
         case ELangTagFormat::langIdFull:
         case ELangTagFormat::langIdX:
@@ -1579,13 +1579,13 @@ std::string formatLangTag(const std::string &langTagOrId, ELangTagFormat fmt)
                  {
                       case ELangTagFormat::langId:      // 409 (no leading zeros)
                            return formatLangId(pLocInfo->langId, false, true );
-             
+
                       case ELangTagFormat::langIdFull:  // 0409
                            return formatLangId(pLocInfo->langId, false, false);
-             
+
                       case ELangTagFormat::langIdX:     // 0x409
                            return formatLangId(pLocInfo->langId, true , true );
-             
+
                       case ELangTagFormat::langIdFullX: // 0x0409
                            return formatLangId(pLocInfo->langId, true , false);
 
@@ -1628,22 +1628,22 @@ std::string formatLangTag(unsigned langId, ELangTagFormat fmt)
                  }
                  return langTag;
              }
-             
+
         case ELangTagFormat::langTagNeutral: // Force neutral
              return getLanguageTagNeutral(pLocInfo->ltag);
-             
+
         case ELangTagFormat::langTagNeutralAuto:
              return pLocInfo->ltag;
 
         case ELangTagFormat::langId:      // 409 (no leading zeros)
              return formatLangId(pLocInfo->langId, false, true );
-        
+
         case ELangTagFormat::langIdFull:  // 0409
              return formatLangId(pLocInfo->langId, false, false);
-        
+
         case ELangTagFormat::langIdX:     // 0x409
              return formatLangId(pLocInfo->langId, true , true );
-        
+
         case ELangTagFormat::langIdFullX: // 0x0409
              return formatLangId(pLocInfo->langId, true , false);
 
