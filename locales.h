@@ -1565,9 +1565,9 @@ std::string formatLangTag(const std::string &langTagOrId, ELangTagFormat fmt)
         case ELangTagFormat::langTagNeutralAuto:
              return getLocaleLanguageTag( langTagOrId, true /* neutralAllowed */);
 
-        case ELangTagFormat::langId:
-        case ELangTagFormat::langIdFull:
-        case ELangTagFormat::langIdX:
+        case ELangTagFormat::langId:      [[fallthrough]];
+        case ELangTagFormat::langIdFull:  [[fallthrough]];
+        case ELangTagFormat::langIdX:     [[fallthrough]];
         case ELangTagFormat::langIdFullX:
              {
                  const LocaleInfo* pLocInfo = getLocaleInfo( langTagOrId, false /* neutralAllowed */);
@@ -1594,9 +1594,10 @@ std::string formatLangTag(const std::string &langTagOrId, ELangTagFormat fmt)
                       case ELangTagFormat::langTagNeutral    : [[fallthrough]];
                       case ELangTagFormat::langTagNeutralAuto: [[fallthrough]];
 
-                      default: {}
+                      default: break;
                  }
              }
+             break;
 
         case ELangTagFormat::invalid: [[fallthrough]];
 
