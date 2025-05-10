@@ -1049,7 +1049,7 @@ bool tr_has_msg(const all_translations_map_t& trAllMap, const std::string &msgId
 inline
 bool tr_has_msg(const std::string &msgId, std::string catId, std::string langId)
 {
-    tr_has_msg(tr_get_all_translations(), msgId, catId, langId);
+    return tr_has_msg(tr_get_all_translations(), msgId, catId, langId);
 }
 
 inline
