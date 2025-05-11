@@ -434,9 +434,15 @@ ELangTagFormat tr_set_lang_tag_format(ELangTagFormat newFmt)
 }
 
 inline
+std::string tr_fix_lang_tag_format(const std::string &langTagOrId, ELangTagFormat langTagFormat)
+{
+    return formatLangTag(langTagOrId, langTagFormat);
+}
+
+inline
 std::string tr_fix_lang_tag_format(const std::string &langTagOrId)
 {
-    return formatLangTag(langTagOrId, tr_get_lang_tag_format());
+    return tr_fix_lang_tag_format(langTagOrId, tr_get_lang_tag_format());
 }
 
 //----------------------------------------------------------------------------
